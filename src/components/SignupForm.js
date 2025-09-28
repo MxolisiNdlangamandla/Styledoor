@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+
 function SignupForm({ role = "Client" }) {
   const navigate = useNavigate();
   const [form, setForm] = useState({
