@@ -16,7 +16,8 @@ function SearchBar() {
         className="search-input"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Find a service near you"
+        placeholder="Find a waasha near you..."
+        aria-label="Search"
       />
       <button className="btn small" type="submit">SEARCH</button>
     </form>
