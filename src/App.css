@@ -28,16 +28,18 @@ body,html,#root{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,san
   background:var(--card);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
-  padding:22px;
+  padding: 50px;
+  /* background-color: #053064; */
 }
 
 /* Header / brand */
 .brand-header{ text-align:center; margin-bottom:10px; }
 .logo-circle{
-  width:20px;height: 20px;margin:6px auto;border-radius:50%;
+  width:20px;height: 20px;margin:6px auto;border-radius:20%;
   background:linear-gradient(135deg,var(--accent-2),var(--accent));
   display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;
   box-shadow: 0 6px 18px rgba(59,130,246,0.12);
+  background-color: #2b6ef6;
 }
 .brand-title{ margin:8px 0 2px; font-size:22px; letter-spacing:1px; color:var(--dark) }
 .brand-slogan{ font-size:13px; color:var(--muted) }
@@ -60,7 +62,7 @@ body,html,#root{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,san
 .lead{ color:var(--muted); font-size:13px; line-height:1.5; text-align:center; margin:14px 0 22px }
 
 /* Actions/buttons */
-.actions{ display:flex; flex-direction:column; gap:12px; margin-bottom:14px }
+.actions{ display:flex; flex-direction:row; gap:12px; margin-bottom:14px;justify-content: space-evenly;}
 .btn{
   padding:12px; border-radius:999px; font-weight:700; cursor:pointer; border:none; font-size:14px;
 }
