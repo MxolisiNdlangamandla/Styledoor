@@ -5,7 +5,7 @@ function SearchBar() {
 
   function submit(e) {
     e.preventDefault();
-    // Placeholder behaviour: log query. Later we'll call an API or navigate to a search results page.
+    // Placeholder behavior: log query. Later we'll call an API or navigate to a search results page.
     console.log("Search for:", q);
     alert(`Searching for: ${q || "nearby services"}`);
   }
