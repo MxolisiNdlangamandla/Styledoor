@@ -16,7 +16,7 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
 
   // 🚨 TESTING MODE - Set to false when going live
-  const TESTING_MODE = true;
+  const TESTING_MODE = false;
 
   // Mock user data for testing
   const MOCK_CLIENT_USER = {
