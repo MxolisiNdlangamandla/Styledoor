@@ -1,4 +1,29 @@
-/* ========== CSS CUSTOM PROPERTIES (CSS VARIABLES) ========== */
+/* ============================================================
+   TABLE OF CONTENTS
+   ============================================================
+   1. CSS CUSTOM PROPERTIES (VARIABLES)
+   2. GLOBAL RESETS
+   3. LAYOUT COMPONENTS
+   4. HEADER & NAVIGATION
+   5. FEATURED SERVICES
+   6. SERVICE CARDS
+   7. SEARCH BAR
+   8. BUTTONS
+   9. TYPOGRAPHY
+   10. FORMS & INPUTS
+   11. ALERTS & MESSAGES
+   12. CHOOSE SERVICES PAGE
+   13. PROVIDER DASHBOARD
+   14. BOTTOM NAVIGATION
+   15. UTILITY CLASSES
+   16. ANIMATIONS
+   17. RESPONSIVE DESIGN
+   18. ACCESSIBILITY
+   ============================================================ */
+
+/* ============================================================
+   1. CSS CUSTOM PROPERTIES (VARIABLES)
+   ============================================================ */
 :root {
   /* Color Palette */
   --bg: #f3f6fb;
@@ -10,6 +35,7 @@
   --light-gray: #f8f9fa;
   --border-light: #e6edf8;
   --border-lighter: #eef3f9;
+  --text-primary: #1a1a1a;
   
   /* Status Colors */
   --success: #1ca67a;
@@ -54,7 +80,9 @@
   --z-bottom-nav: 1020;
 }
 
-/* ========== GLOBAL RESETS ========== */
+/* ============================================================
+   2. GLOBAL RESETS
+   ============================================================ */
 * {
   box-sizing: border-box;
 }
@@ -68,7 +96,9 @@ body, html, #root {
   line-height: 1.5;
 }
 
-/* ========== LAYOUT COMPONENTS ========== */
+/* ============================================================
+   3. LAYOUT COMPONENTS
+   ============================================================ */
 .app-root {
   min-height: 100vh;
   display: flex;
@@ -77,36 +107,96 @@ body, html, #root {
   padding: 5px;
 }
 
-/* Page wrapper centers content on the screen */
 .page-wrapper {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 100vh;
 }
 
-/* Main card container (looks like the phone card in your screenshot) */
 .container {
   width: min(92%, var(--max-width));
   background: var(--card);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: var(--container-padding);
-  margin-bottom: 80px; /* Space for bottom navigation */
+  margin-bottom: 80px;
   position: relative;
 }
 
-/* ========== HEADER / BRAND ========== */
+.container.landing {
+  padding: 24px;
+}
+
+/* ============================================================
+   4. HEADER & NAVIGATION
+   ============================================================ */
+/* Landing Page Logo Section */
+.landing-logo-section {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-top: 12px;
+}
+
+.landing-logo-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 12px;
+  border-radius:50%;
+  /* background: linear-gradient(135deg, var(--accent-2), var(--accent)); */
+  /* box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2); */
+  transition: transform 0.3s ease;
+}
+
+.landing-logo-image {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+
+}
+
+.landing-logo-text {
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 2px;
+}
+
+.landing-brand-name {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--dark);
+  margin: 0 0 4px 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.landing-brand-tagline {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+/* ...existing code... */
 .brand-header {
   text-align: center;
   margin-bottom: 10px;
 }
 
 .logo-circle {
-  width: 20px;
-  height: 20px;
+  width: 100px;
+  height: 100px;
   margin: 6px auto;
-  border-radius: 20%;
+  border-radius: 50%;
   background: linear-gradient(135deg, var(--accent-2), var(--accent));
   display: flex;
   align-items: center;
@@ -130,7 +220,79 @@ body, html, #root {
   color: var(--muted);
 }
 
-/* ========== SERVICE CARDS ========== */
+
+
+/* ============================================================
+   5. FEATURED SERVICES SECTION
+   ============================================================ */
+/* Main container for featured services section */
+.featured-services-section {
+  margin: 24px 0;
+  display: flex;
+  justify-content: center; /* ✅ Center the grid container */
+  width: 100%;
+}
+
+/* Grid layout for service cards */
+.featured-services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
+  gap: 16px;
+  margin: 20px auto; /* ✅ Center horizontally with auto margins */
+  max-width: 100%; /* Use full available width */
+  justify-items: center; /* ✅ Center items within grid cells */
+}
+
+/* Individual service card */
+.featured-service-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* ✅ Center content horizontally inside card */
+  justify-content: center; /* ✅ Center content vertically inside card */
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 12px;
+  border-radius: var(--radius-small);
+  background: white;
+  border: 1px solid var(--border-lighter);
+  width: 100%; /* Use full width of grid cell */
+  max-width: 120px; /* ✅ Limit card width for better proportions */
+}
+
+.featured-service-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-light);
+  border-color: var(--accent);
+}
+
+
+/* Icon container inside card */
+.featured-service-icon {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  background: linear-gradient(180deg, #e5e5ec, #f0f7ff);
+  border-radius: var(--radius-small);
+  margin-bottom: 12px;
+  border: 1px solid #e8f1ff;
+}
+
+/* Service title text */
+.featured-service-title {
+  font-size: var(--font-size-sm);
+  color: var(--dark);
+  font-weight: 500;
+  line-height: 1.3;
+  margin: 0;
+}
+
+/* ============================================================
+   6. SERVICE CARDS (Legacy)
+   ============================================================ */
 .services-row {
   display: flex;
   justify-content: space-evenly;
@@ -172,18 +334,20 @@ body, html, #root {
   line-height: 1.3;
 }
 
-/* ========== SEARCH BAR ========== */
+/* ============================================================
+   7. SEARCH BAR
+   ============================================================ */
 .search-wrap {
   display: flex;
   gap: var(--gap-small);
   align-items: center;
-  margin: 8px 0 18px;
+  margin: 20px 0;
   position: relative;
 }
 
 .search-input {
   flex: 1;
-  padding: 12px 14px;
+  padding: 12px 16px;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-pill);
   outline: none;
@@ -197,7 +361,6 @@ body, html, #root {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Search suggestions dropdown */
 .search-suggestions {
   position: absolute;
   top: 100%;
@@ -227,7 +390,9 @@ body, html, #root {
   background-color: var(--light-gray);
 }
 
-/* ========== BUTTONS ========== */
+/* ============================================================
+   8. BUTTONS
+   ============================================================ */
 .btn {
   padding: 12px;
   border-radius: var(--radius-pill);
@@ -240,7 +405,7 @@ body, html, #root {
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  min-height: 44px; /* Accessibility: minimum touch target */
+  min-height: 44px;
 }
 
 .btn:disabled {
@@ -273,12 +438,12 @@ body, html, #root {
 .btn.outline {
   background: white;
   color: var(--accent);
-  border: 1px solid rgba(59, 130, 246, 0.18);
+  border: 2px solid var(--accent);
 }
 
 .btn.outline:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.05);
-  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
 }
 
 .btn.submit {
@@ -292,7 +457,40 @@ body, html, #root {
   background: #1a3a5c;
 }
 
-/* ========== TYPOGRAPHY ========== */
+.btn-submit {
+  width: 100%;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: #1976d2;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1565c0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+}
+
+.btn-loading {
+  position: relative;
+}
+
+/* ============================================================
+   9. TYPOGRAPHY
+   ============================================================ */
 .lead {
   color: var(--muted);
   font-size: var(--font-size-sm);
@@ -301,95 +499,26 @@ body, html, #root {
   margin: 14px 0 22px;
 }
 
-/* ========== LAYOUT: ACTIONS ========== */
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-small);
-  margin-bottom: 14px;
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
-/* Small footer text on landing */
-.footer-small {
-  text-align: center;
-  font-size: var(--font-size-sm);
-  color: var(--muted);
-  margin-top: 6px;
+p {
+  margin: 0;
+  line-height: 1.6;
 }
 
-.footer-small a {
-  color: var(--accent);
-  font-weight: 700;
-  margin-left: 6px;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.footer-small a:hover {
-  color: var(--accent-2);
-}
-
-/* ========== FORM / CARD STYLES ========== */
+/* ============================================================
+   10. FORMS & INPUTS
+   ============================================================ */
 .form-page {
   display: flex;
   flex-direction: column;
   gap: var(--gap-small);
 }
 
-.card-top {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: var(--gap-small);
-}
-
-.back-link {
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 20px;
-  padding: 8px;
-  border-radius: var(--radius-small);
-  transition: all 0.2s ease;
-}
-
-.back-link:hover {
-  background: var(--light-gray);
-  color: var(--dark);
-}
-
-.top-text {
-  text-align: left;
-}
-
-.small-brand {
-  font-size: var(--font-size-sm);
-  color: var(--muted);
-  font-weight: 600;
-}
-
-.small-slogan {
-  font-size: var(--font-size-xs);
-  color: #9aa4b2;
-}
-
-/* The white card (inputs) */
-.card {
-  background: var(--card);
-  border-radius: var(--radius-small);
-  box-shadow: var(--shadow-heavy);
-  padding: 18px;
-  margin-top: 6px;
-}
-
-.card-title {
-  text-align: center;
-  color: var(--dark);
-  margin: 0 0 12px;
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-}
-
-/* ========== FORM FIELDS ========== */
 .form {
   display: flex;
   flex-direction: column;
@@ -403,50 +532,101 @@ body, html, #root {
   margin-bottom: 4px;
 }
 
-.form input {
-  padding: 10px 12px;
+.form input,
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
   border-radius: var(--radius-small);
   border: 1px solid var(--border-lighter);
   outline: none;
   font-size: var(--font-size-base);
   background: #fff;
   transition: all 0.2s ease;
-  min-height: 44px; /* Accessibility: minimum touch target */
+  min-height: 44px;
+  box-sizing: border-box;
 }
 
-.form input:focus {
+.form input:focus,
+.form-input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.form input:disabled {
+.form input:disabled,
+.form-input:disabled {
   background: var(--light-gray);
   color: var(--muted);
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
-/* Card footer links */
-.card-footer {
-  display: block;
-  justify-content: space-between;
-  margin-top: 12px;
-  font-size: var(--font-size-sm);
-  padding: 5px 0;
+select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  background-color: white;
+  cursor: pointer;
+  appearance: auto;
 }
 
-.card-footer a {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 700;
-  transition: color 0.2s ease;
-  padding: 4px 0 ;
+select:focus {
+  outline: none;
+  border-color: #007bff;
 }
 
-.card-footer a:hover {
-  color: var(--accent-2);
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-/* ========== ERROR & SUCCESS STATES ========== */
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.required {
+  color: #dc3545;
+}
+
+/* ============================================================
+   11. ALERTS & MESSAGES
+   ============================================================ */
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.alert-success {
+  color: #28a745;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+}
+
+.alert-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.alert-message {
+  flex: 1;
+}
+
 .error-message {
   background: var(--error-bg);
   color: var(--error);
@@ -467,7 +647,157 @@ body, html, #root {
   border: 1px solid rgba(28, 166, 122, 0.2);
 }
 
-/* ========== BOTTOM NAVIGATION ========== */
+/* ============================================================
+   12. CHOOSE SERVICES PAGE
+   ============================================================ */
+.choose-services {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.choose-services-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.choose-services-header h2 {
+  color: var(--accent);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.services-list {
+  margin-bottom: 40px;
+}
+
+.service-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.service-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  transition: all 0.3s ease;
+  padding: 8px 0;
+  border-radius: 8px;
+}
+
+.service-content.active {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.service-content.inactive {
+  color: #666;
+}
+
+.service-icon {
+  font-size: 1.5rem;
+  margin-right: 16px;
+  width: 32px;
+  display: flex;
+  justify-content: center;
+}
+
+.service-name {
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.toggle-switch {
+  cursor: pointer;
+  padding: 8px;
+}
+
+.toggle {
+  width: 48px;
+  height: 28px;
+  background: #ddd;
+  border-radius: 14px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.toggle.on {
+  background: var(--accent);
+}
+
+.toggle-handle {
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.toggle.on .toggle-handle {
+  transform: translateX(20px);
+}
+
+.save-button {
+  width: 100%;
+  background: #333;
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.save-button:hover:not(:disabled) {
+  background: #222;
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   13. PROVIDER DASHBOARD
+   ============================================================ */
+.dashboard-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-card h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 12px 0;
+}
+
+.dashboard-card p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   14. BOTTOM NAVIGATION
+   ============================================================ */
 .bottom-navigation {
   position: fixed;
   bottom: 0;
@@ -498,16 +828,12 @@ body, html, #root {
   transition: all 0.2s ease;
   color: var(--muted);
   font-weight: 500;
-  min-height: 44px; /* Accessibility: minimum touch target */
+  min-height: 44px;
 }
 
 .nav-tab.active {
   color: var(--accent);
   font-weight: 600;
-}
-
-.nav-tab:hover {
-  background-color: var(--light-gray);
 }
 
 .tab-icon {
@@ -518,24 +844,9 @@ body, html, #root {
   font-size: var(--font-size-xs);
 }
 
-/* ========== LOADING STATES ========== */
-.loading-spinner {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--border-light);
-  border-radius: 50%;
-  border-top-color: var(--accent);
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ========== UTILITY CLASSES ========== */
+/* ============================================================
+   15. UTILITY CLASSES
+   ============================================================ */
 .text-center { text-align: center; }
 .text-left { text-align: left; }
 .text-right { text-align: right; }
@@ -559,51 +870,82 @@ body, html, #root {
 .gap-2 { gap: var(--gap-small); }
 .gap-4 { gap: var(--gap); }
 
-/* ========== RESPONSIVE DESIGN ========== */
-/* Mobile first tweaks for narrower screens */
+/* ============================================================
+   16. ANIMATIONS
+   ============================================================ */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-light);
+  border-radius: 50%;
+  border-top-color: var(--accent);
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================================
+   17. RESPONSIVE DESIGN
+   ============================================================ */
+/* Mobile: 2 columns, centered */
 @media (max-width: 420px) {
-  :root {
-    --max-width: 380px;
-    --container-padding: 18px;
+  .featured-services-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+    gap: 12px;
+    padding: 0 10px; /* Add some padding on sides */
   }
   
-  .brand-title {
-    font-size: 20px;
+  .featured-service-card {
+    max-width: 100px; /* Smaller cards on mobile */
   }
   
-  .btn {
-    font-size: var(--font-size-sm);
-  }
-  
-  .actions {
-    flex-direction: column;
+  .featured-service-icon {
+    width: 70px;
+    height: 70px;
+    font-size: 35px;
   }
 }
 
-/* Desktop adjustments: allow a wider container on bigger screens */
+/* Tablet: 3 columns, centered */
+@media (min-width: 421px) and (max-width: 768px) {
+  .featured-services-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+}
+
+/* Desktop: 4 columns, centered */
 @media (min-width: 900px) {
-  :root {
-    --max-width: 540px;
+  .featured-services-grid {
+    grid-template-columns: repeat(4, 1fr); /* 4 columns on large screens */
+    gap: 20px;
   }
   
-  .page-wrapper {
-    padding: 40px;
-  }
-  
-  .actions {
-    flex-direction: row;
-    justify-content: space-evenly;
+  .featured-service-card {
+    max-width: 140px; /* Larger cards on desktop */
   }
 }
 
-/* ========== ACCESSIBILITY IMPROVEMENTS ========== */
-/* Focus styles for keyboard navigation */
+/* ============================================================
+   18. ACCESSIBILITY
+   ============================================================ */
 *:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -612,40 +954,77 @@ body, html, #root {
   }
 }
 
-/* High contrast mode support */
 @media (prefers-contrast: high) {
   :root {
     --border-light: #000;
     --border-lighter: #000;
   }
 }
-/* Add this to your CSS file to ensure select dropdowns are visible */
-select {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 14px;
-  margin-bottom: 15px;
-  background-color: white;
+
+/* ============================================================
+   MISCELLANEOUS COMPONENTS
+   ============================================================ */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-small);
+  margin-bottom: 14px;
+}
+
+.footer-small {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.footer-small a {
+  color: var(--accent);
+  font-weight: 700;
+  margin-left: 6px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-small a:hover {
+  color: var(--accent-2);
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-weight: 600;
   cursor: pointer;
-  appearance: auto; /* Ensures dropdown arrow is visible */
+  padding: 0;
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
 
-select:focus {
-  outline: none;
-  border-color: #007bff;
+.link-button:hover:not(:disabled) {
+  color: #1565c0;
+  text-decoration: underline;
 }
 
-select:disabled {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
+.info-box {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #e8f4fd;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
 }
 
-/* Ensure labels are visible */
-label {
+.info-box-title {
   display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #333;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.info-box-list {
+  margin: 8px 0 0 20px;
+  padding: 0;
+  line-height: 1.6;
 }

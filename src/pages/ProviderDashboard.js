@@ -1,494 +1,219 @@
+// React core - useState for managing component state, useEffect for side effects
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import PropTypes from 'prop-types';
 
-// Import components
-import BottomNavigation from '../components/BottomNavigation';
-import SearchBar from '../components/SearchBar';
+// React Router hooks:
+// - useNavigate: programmatically navigate to different routes
+// - useLocation: access current location/route information and state
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const ProviderDashboard = ({ user, onLogout }) => {
+// Custom Header component for navigation bar
+import Header from '../components/Header';
+
+// PROVIDER DASHBOARD COMPONENT
+
+function ProviderDashboard() {
+  
+  // HOOKS INITIALIZATION
+  
+  // Hook to navigate to different pages programmatically
   const navigate = useNavigate();
   
-  // State for provider's services, bookings, and team
-  const [services, setServices] = useState([]);
-  const [bookings, setBookings] = useState([]);
-  const [team, setTeam] = useState([]);
-  const [completedBookings, setCompletedBookings] = useState([]);
-  const [loading, setLoading] = useState({
-    services: true,
-    bookings: true,
-    team: true,
-    completed: true
-  });
-  const [error, setError] = useState(null);
+  // Hook to access current route location and any passed state
+  const location = useLocation();
+  
+  // State to store the logged-in user's data (username, email, user_type, etc.)
+  const [user, setUser] = useState(null);
+  
+  // State to store success/info messages to display to the user
+  const [message, setMessage] = useState('');
 
-  // Fetch provider data on component mount
+  // ============================================
+  // AUTHENTICATION & INITIALIZATION
+  // ============================================
+  
+  // useEffect runs when component mounts and when dependencies change
+  // Dependencies: [navigate, location] - runs when these change
   useEffect(() => {
-    if (user) {
-      fetchProviderData();
+    
+    // STEP 1: Check if user is logged in
+    // Get user data from browser's localStorage (saved during login/registration)
+    const userData = localStorage.getItem('user');
+    
+    // If no user data found, user is not logged in
+    if (!userData) {
+      // Redirect to login page
+      navigate('/login');
+      return; // Exit early, don't run rest of code
     }
-  }, [user]);
 
-  // Fetch all provider-related data
-  async function fetchProviderData() {
-    try {
-      await Promise.all([
-        fetchServices(),
-        fetchBookings(),
-        fetchTeam(),
-        fetchCompletedBookings()
-      ]);
-    } catch (err) {
-      console.error('Failed to fetch provider data:', err);
-      setError('Failed to load dashboard data. Please refresh the page.');
+    // STEP 2: Parse and validate user data
+    // Convert JSON string from localStorage back to JavaScript object
+    const parsedUser = JSON.parse(userData);
+    
+    // Check if user is actually a Provider (not a Client)
+    if (parsedUser.user_type !== 'Provider') {
+      // If user is a Client, redirect them to client dashboard
+      navigate('/client');
+      return; // Exit early
     }
-  }
 
-  // Fetch provider's services
-  async function fetchServices() {
-    try {
-      // Mock data for now - replace with actual API call
-      setTimeout(() => {
-        setServices([
-          { id: 1, name: 'Hair Styling', price: 50, status: 'active', bookings: 5 },
-          { id: 2, name: 'Hair Cut', price: 30, status: 'active', bookings: 8 },
-          { id: 3, name: 'Hair Wash', price: 20, status: 'active', bookings: 3 }
-        ]);
-        setLoading(prev => ({ ...prev, services: false }));
-      }, 800);
-    } catch (err) {
-      console.error('Failed to fetch services:', err);
-      setLoading(prev => ({ ...prev, services: false }));
+    // STEP 3: User is authenticated and is a Provider
+    // Store user data in component state for use in JSX
+    setUser(parsedUser);
+
+    // STEP 4: Check for navigation messages
+    // location.state?.message checks if a message was passed during navigation
+    // Example: navigate('/provider', { state: { message: 'Success!' } })
+    if (location.state?.message) {
+      // Display the message to user
+      setMessage(location.state.message);
+      
+      // Automatically clear the message after 5 seconds (5000ms)
+      setTimeout(() => setMessage(''), 5000);
     }
-  }
+    
+  }, [navigate, location]); // Re-run effect if navigate or location changes
 
-  // Fetch active bookings
-  async function fetchBookings() {
-    try {
-      // Mock data for now - replace with actual API call
-      setTimeout(() => {
-        setBookings([
-          { 
-            id: 1, 
-            client_name: 'John Doe', 
-            service: 'Hair Cut', 
-            date: '2025-01-15', 
-            time: '10:00', 
-            status: 'confirmed',
-            phone: '+27 82 123 4567'
-          },
-          { 
-            id: 2, 
-            client_name: 'Sarah Wilson', 
-            service: 'Hair Styling', 
-            date: '2025-01-15', 
-            time: '14:30', 
-            status: 'pending',
-            phone: '+27 81 987 6543'
-          },
-          { 
-            id: 3, 
-            client_name: 'Mike Johnson', 
-            service: 'Hair Wash', 
-            date: '2025-01-16', 
-            time: '09:00', 
-            status: 'confirmed',
-            phone: '+27 83 456 7890'
-          }
-        ]);
-        setLoading(prev => ({ ...prev, bookings: false }));
-      }, 600);
-    } catch (err) {
-      console.error('Failed to fetch bookings:', err);
-      setLoading(prev => ({ ...prev, bookings: false }));
-    }
-  }
+  // ============================================
+  // LOADING STATE
+  // ============================================
+  
+  // If user data hasn't loaded yet, show loading text
+  // This prevents errors from trying to access user.username before it exists
+  if (!user) return <div>Loading...</div>;
 
-  // Fetch team members
-  async function fetchTeam() {
-    try {
-      // Mock data for now - replace with actual API call
-      setTimeout(() => {
-        setTeam([
-          { 
-            id: 1, 
-            name: 'Alice Brown', 
-            role: 'Senior Stylist', 
-            status: 'online',
-            avatar: '/team-alice.jpg',
-            rating: 4.8
-          },
-          { 
-            id: 2, 
-            name: 'David Lee', 
-            role: 'Hair Specialist', 
-            status: 'online',
-            avatar: '/team-david.jpg',
-            rating: 4.6
-          },
-          { 
-            id: 3, 
-            name: 'Emma Clark', 
-            role: 'Junior Stylist', 
-            status: 'offline',
-            avatar: '/team-emma.jpg',
-            rating: 4.4
-          }
-        ]);
-        setLoading(prev => ({ ...prev, team: false }));
-      }, 1000);
-    } catch (err) {
-      console.error('Failed to fetch team:', err);
-      setLoading(prev => ({ ...prev, team: false }));
-    }
-  }
-
-  // Fetch completed bookings
-  async function fetchCompletedBookings() {
-    try {
-      // Mock data for now - replace with actual API call
-      setTimeout(() => {
-        setCompletedBookings([
-          { 
-            id: 1, 
-            client_name: 'Lisa Anderson', 
-            service: 'Hair Cut', 
-            date: '2025-01-10', 
-            time: '11:00', 
-            status: 'completed',
-            rating: 5,
-            earnings: 30
-          },
-          { 
-            id: 2, 
-            client_name: 'Tom Wilson', 
-            service: 'Hair Styling', 
-            date: '2025-01-12', 
-            time: '15:30', 
-            status: 'completed',
-            rating: 4,
-            earnings: 50
-          },
-          { 
-            id: 3, 
-            client_name: 'Kate Davis', 
-            service: 'Hair Wash', 
-            date: '2025-01-13', 
-            time: '10:15', 
-            status: 'completed',
-            rating: 5,
-            earnings: 20
-          }
-        ]);
-        setLoading(prev => ({ ...prev, completed: false }));
-      }, 1200);
-    } catch (err) {
-      console.error('Failed to fetch completed bookings:', err);
-      setLoading(prev => ({ ...prev, completed: false }));
-    }
-  }
-
-  // Handle search functionality
-  function handleSearch(query) {
-    navigate(`/search?q=${encodeURIComponent(query)}`);
-  }
-
-  // Handle logout
-  function handleLogout() {
-    if (onLogout) {
-      onLogout();
-    }
-    navigate('/');
-  }
-
-  // Show error state if there's an error
-  if (error) {
-    return (
-      <div className="container">
-        <div className="brand-header">
-          <div className="logo-circle">W</div>
-          <div className="brand-title">Waasha</div>
-          <div className="brand-slogan">Dashboard Error</div>
-        </div>
-        <div className="card">
-          <div className="card-title">Error</div>
-          <p className="lead" style={{ color: 'red' }}>{error}</p>
-          <button className="btn primary" onClick={() => window.location.reload()}>
-            Retry
-          </button>
-        </div>
-        <BottomNavigation userRole="provider" />
-      </div>
-    );
-  }
-
+  // ============================================
+  // RENDER JSX (USER INTERFACE)
+  // ============================================
+  
   return (
-    <div className="container">
-      {/* Header with welcome message and user actions */}
-      <div className="brand-header">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-          <div>
-            <div className="logo-circle">W</div>
-            <div className="brand-title">Waasha</div>
-            <div className="brand-slogan">
-              Welcome, {user?.first_name || "Provider"}!
-            </div>
-          </div>
-          <button 
-            onClick={handleLogout}
-            style={{
-              background: 'none',
-              border: '1px solid var(--accent)',
-              borderRadius: '8px',
-              padding: '6px 12px',
-              color: 'var(--accent)',
-              fontSize: '12px',
-              cursor: 'pointer'
-            }}
-            aria-label="Logout from your account"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-
-      {/* Search bar for managing services */}
-      <SearchBar 
-        onSearch={handleSearch}
-        placeholder="Search clients, bookings..."
-        variant="default"
+    <div className="page-wrapper">
+      
+      {/* ============================================
+          HEADER NAVIGATION
+          ============================================ */}
+      
+      {/* Header component with dashboard variant and user data */}
+      <Header 
+        variant="dashboard"  // Tells Header to render dashboard-style nav
+        user={user}          // Pass user data to Header (for logout, profile, etc.)
       />
+      
+      {/* ============================================
+          MAIN CONTENT CONTAINER
+          ============================================ */}
+      
+      {/* Main content area with top padding to account for fixed header */}
+      <div className="container" style={{ paddingTop: '80px' }}>
+        
+        {/* ============================================
+            SUCCESS/INFO MESSAGE ALERT
+            ============================================ */}
+        
+        {/* Only render alert if message exists (conditional rendering) */}
+        {message && (
+          <div 
+            className="alert alert-success" 
+            style={{ marginBottom: '20px' }}
+          >
+            {/* Success checkmark icon */}
+            <span className="alert-icon">✅</span>
+            
+            {/* The actual message text */}
+            <span className="alert-message">{message}</span>
+          </div>
+        )}
 
-      {/* Quick stats showing provider activity */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '18px' }}>
-        <div style={{
-          flex: 1,
-          background: '#e3f7ff',
-          padding: '12px',
-          borderRadius: '8px',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '18px', fontWeight: '600', color: 'var(--accent)' }}>
-            {bookings.filter(b => b.status === 'confirmed').length}
-          </div>
-          <div style={{ fontSize: '11px', color: 'var(--muted)' }}>Active Bookings</div>
-        </div>
-        <div style={{
-          flex: 1,
-          background: '#d6f5e9',
-          padding: '12px',
-          borderRadius: '8px',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '18px', fontWeight: '600', color: '#1ca67a' }}>
-            {team.filter(t => t.status === 'online').length}
-          </div>
-          <div style={{ fontSize: '11px', color: 'var(--muted)' }}>Online Team</div>
-        </div>
-        <div style={{
-          flex: 1,
-          background: '#fff0e6',
-          padding: '12px',
-          borderRadius: '8px',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '18px', fontWeight: '600', color: '#ff8c00' }}>
-            {completedBookings.length}
-          </div>
-          <div style={{ fontSize: '11px', color: 'var(--muted)' }}>Completed</div>
-        </div>
-      </div>
+        {/* ============================================
+            WELCOME SECTION
+            ============================================ */}
+        
+        {/* Personalized greeting using user's name from state */}
+        <h1>Welcome, {user.username}!</h1>
+        
+        {/* Subtitle describing the page */}
+        <p style={{ color: '#666', marginBottom: '40px' }}>
+          Provider Dashboard
+        </p>
 
-      {/* Active Bookings section */}
-      <div className="card">
-        <div className="card-title">Active Bookings</div>
-        {loading.bookings ? (
-          <p className="lead">Loading bookings...</p>
-        ) : bookings.length > 0 ? (
-          <div>
-            {bookings.slice(0, 3).map(booking => (
-              <div key={booking.id} style={{
-                padding: '12px',
-                background: '#f8f9fa',
-                borderRadius: '8px',
-                marginBottom: '8px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: '600', fontSize: '14px' }}>
-                    {booking.client_name}
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
-                    {booking.service} • {booking.date} at {booking.time}
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>
-                    📞 {booking.phone}
-                  </div>
-                </div>
-                <div style={{
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  fontSize: '11px',
-                  fontWeight: '600',
-                  background: booking.status === 'confirmed' ? '#d6f5e9' : '#fff3cd',
-                  color: booking.status === 'confirmed' ? '#1ca67a' : '#856404'
-                }}>
-                  {booking.status}
-                </div>
-              </div>
-            ))}
-            {bookings.length > 3 && (
-              <button 
-                className="btn outline"
-                onClick={() => navigate('/provider/bookings')}
-                style={{ width: '100%', marginTop: '8px' }}
-              >
-                View All Bookings
-              </button>
-            )}
-          </div>
-        ) : (
-          <div>
-            <p className="lead">No active bookings.</p>
-            <button className="btn primary" onClick={() => navigate('/provider/services')}>
-              Manage Services
+        {/* ============================================
+            DASHBOARD CARDS GRID
+            ============================================ */}
+        
+        {/* Grid container for dashboard action cards */}
+        <div style={{
+          display: 'grid',                                    // Use CSS Grid layout
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', // Responsive columns: min 250px, auto-fit
+          gap: '20px',                                        // 20px space between cards
+          marginTop: '30px'                                   // Space above grid
+        }}>
+          
+          {/* ============================================
+              CARD 1: MY SERVICES
+              ============================================ */}
+          
+          <div className="dashboard-card">
+            {/* Card title */}
+            <h3>My Services</h3>
+            
+            {/* Card description */}
+            <p>Manage your service offerings</p>
+            
+            {/* Button to add new service */}
+            <button 
+              className="btn btn-primary"              // Primary button styling (blue, solid)
+              onClick={() => navigate('/add-service')} // Navigate to add-service page on click
+              style={{ marginTop: '15px' }}           // Space above button
+            >
+              + Add New Service
             </button>
           </div>
-        )}
-      </div>
 
-      {/* Online Team section */}
-      <div className="card" style={{ marginTop: '18px' }}>
-        <div className="card-title">Team Status</div>
-        {loading.team ? (
-          <p className="lead">Loading team...</p>
-        ) : team.length > 0 ? (
-          <div>
-            {team.slice(0, 3).map(member => (
-              <div key={member.id} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '8px 0',
-                borderBottom: '1px solid #f0f0f0'
-              }}>
-                <img 
-                  src={member.avatar || '/default-avatar.png'} 
-                  alt={`${member.name} profile`}
-                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: '600', fontSize: '14px' }}>{member.name}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
-                    {member.role} • ★ {member.rating}
-                  </div>
-                </div>
-                <div style={{
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  fontSize: '11px',
-                  fontWeight: '600',
-                  background: member.status === 'online' ? '#d6f5e9' : '#f8f9fa',
-                  color: member.status === 'online' ? '#1ca67a' : '#6b7280'
-                }}>
-                  {member.status}
-                </div>
-              </div>
-            ))}
-            {team.length > 3 && (
-              <button 
-                className="btn outline"
-                onClick={() => navigate('/provider/team')}
-                style={{ width: '100%', marginTop: '8px' }}
-              >
-                View All Team
-              </button>
-            )}
-          </div>
-        ) : (
-          <div>
-            <p className="lead">No team members added yet.</p>
-            <button className="btn primary" onClick={() => navigate('/provider/team/add')}>
-              Add Team Member
+          {/* ============================================
+              CARD 2: BOOKINGS
+              ============================================ */}
+          
+          <div className="dashboard-card">
+            {/* Card title */}
+            <h3>Bookings</h3>
+            
+            {/* Card description */}
+            <p>View and manage appointments</p>
+            
+            {/* Button to view bookings (functionality not implemented yet) */}
+            <button 
+              className="btn btn-outline"           // Outline button styling (white with blue border)
+              style={{ marginTop: '15px' }}        // Space above button
+            >
+              View Bookings
             </button>
           </div>
-        )}
-      </div>
 
-      {/* Completed Bookings section */}
-      <div className="card" style={{ marginTop: '18px' }}>
-        <div className="card-title">Recent Completed</div>
-        {loading.completed ? (
-          <p className="lead">Loading completed bookings...</p>
-        ) : completedBookings.length > 0 ? (
-          <div>
-            {completedBookings.slice(0, 3).map(booking => (
-              <div key={booking.id} style={{
-                padding: '12px',
-                background: '#f8f9fa',
-                borderRadius: '8px',
-                marginBottom: '8px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: '600', fontSize: '14px' }}>
-                    {booking.client_name}
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
-                    {booking.service} • {booking.date}
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>
-                    {'★'.repeat(booking.rating)} • R{booking.earnings}
-                  </div>
-                </div>
-                <div style={{
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  fontSize: '11px',
-                  fontWeight: '600',
-                  background: '#d6f5e9',
-                  color: '#1ca67a'
-                }}>
-                  Completed
-                </div>
-              </div>
-            ))}
-            {completedBookings.length > 3 && (
-              <button 
-                className="btn outline"
-                onClick={() => navigate('/provider/completed')}
-                style={{ width: '100%', marginTop: '8px' }}
-              >
-                View All Completed
-              </button>
-            )}
+          {/* ============================================
+              CARD 3: PROFILE
+              ============================================ */}
+          
+          <div className="dashboard-card">
+            {/* Card title */}
+            <h3>Profile</h3>
+            
+            {/* Card description */}
+            <p>Update your provider profile</p>
+            
+            {/* Button to edit profile (functionality not implemented yet) */}
+            <button 
+              className="btn btn-outline"           // Outline button styling
+              style={{ marginTop: '15px' }}        // Space above button
+            >
+              Edit Profile
+            </button>
           </div>
-        ) : (
-          <p className="lead">No completed bookings yet.</p>
-        )}
-      </div>
 
-      {/* Bottom Navigation */}
-      <BottomNavigation userRole="provider" />
+        </div>
+      </div>
     </div>
   );
-};
+}
 
-// PropTypes
-ProviderDashboard.propTypes = {
-  user: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    first_name: PropTypes.string,
-    last_name: PropTypes.string,
-    email: PropTypes.string,
-    role: PropTypes.string.isRequired,
-    token: PropTypes.string
-  }).isRequired,
-  onLogout: PropTypes.func
-};
-
+// Export component so it can be imported and used in App.js routes
 export default ProviderDashboard;

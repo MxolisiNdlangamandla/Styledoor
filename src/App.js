@@ -8,6 +8,8 @@ import ClientDashboard from './pages/ClientDashboard';
 import ProviderDashboard from './pages/ProviderDashboard';
 import SignupClient from './pages/SignupClient';
 import SignupProvider from './pages/SignupProvider';
+import ChooseServices from './pages/ChooseServices';
+import AddService from './pages/Provider-a-service';
 
 function App() {
   // State for current user
@@ -145,6 +147,10 @@ function App() {
                 path="/" 
                 element={<LandingPage isAuthenticated={!!user} user={user} />} 
               />
+              <Route 
+               path="/add-service" 
+               element={<AddService />} 
+                />
 
               {/* Login page */}
               <Route 
@@ -161,6 +167,10 @@ function App() {
               <Route 
                 path="/signup-provider" 
                 element={<SignupProvider setUser={handleLogin} />} 
+              />
+                <Route 
+                path="/choose-services" 
+                element={<ChooseServices setUser={handleLogin} />} 
               />
 
               {/* Direct access to dashboards for testing */}
@@ -187,9 +197,9 @@ function App() {
               {/* Redirect unknown routes to home */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+           </div>
           </div>
-        </div>
-      </Router>
+          </Router>
     );
   }
 

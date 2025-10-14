@@ -1,6 +1,8 @@
 import React from "react"; // Import React for JSX rendering
 import PropTypes from 'prop-types'; // Import PropTypes for type checking
-import logo from "../assets/Logo.png"; // Import logo image asset
+import logo from "../assets/logo.png"; // Import logo image asset
+
+console.log('Logo path:', logo); // Debug: Check if logo path is correct
 
 // Header component displays the main brand header with logo and text
 function Header({ 
@@ -11,10 +13,11 @@ function Header({
   className = "brand-header", // Customizable CSS class
   variant = "default" // Header variant (default, compact, minimal)
 }) {
+  console.log('Header component - showLogo:', showLogo, 'logoSize:', logoSize, 'variant:', variant);
   
   // Handle logo load error - fallback to text logo
   function handleLogoError(e) {
-    console.warn('Logo failed to load, hiding image');
+    console.warn('logo failed to load, hiding image');
     e.target.style.display = 'none'; // Hide broken image
   }
 
@@ -58,7 +61,7 @@ function Header({
       {showLogo && variant !== 'minimal' && (
         <img 
           src={logo} 
-          alt={`${title} Logo`} // Dynamic alt text based on title
+          alt={`${title} logo`} // Dynamic alt text based on title
           className="brand-logo"
           style={getLogoStyles()}
           onError={handleLogoError} // Handle broken image gracefully
@@ -108,11 +111,12 @@ Header.propTypes = {
 // Default props - fallback values if no props are provided
 Header.defaultProps = {
   showLogo: true,
+  logoSrc: logo, // Default logo image
   logoSize: 150,
   title: "WAASHA",
   slogan: "The Future Of Service, Today",
   className: "brand-header",
-  variant: "default"
+  variant: "default",
 };
 
 export default Header;

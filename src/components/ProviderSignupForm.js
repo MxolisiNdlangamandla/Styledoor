@@ -1,397 +1,348 @@
-import React, { useState } from "react"; // Import React and useState hook for state management
-import { Link, useNavigate } from "react-router-dom"; // Import Link for navigation and useNavigate for programmatic routing
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png'; // ✅ Import logo
 
-// SignupFormProvider component for Provider registration only
+/**
+ * ProviderSignupForm Component
+ * 
+ * This component handles provider registration and redirects to choose services
+ * after successful signup. Updated to integrate with backend API.
+ */
 function SignupFormProvider() {
-  const navigate = useNavigate(); // Hook to navigate after successful signup
+  const navigate = useNavigate(); // ✅ Hook for navigation after registration
   
-  // State for all form fields (Provider registration)
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    password: "",
-    // Provider-specific fields (always included)
-    businessType: "",
-    businessCategory: [] // Changed to array for multiple selections
+  // State for form data
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone_number: '',
+    user_type: 'Provider' // ✅ Ensure this is set to Provider
   });
-  
-  // State for error messages
-  const [error, setError] = useState("");
-  // State for loading status during API calls
+
+  // State for UI feedback
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  // Handles input changes and updates form state
-  function handleChange(e) {
+  // Handle input changes
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-    // Handle multiple select for businessCategory
-    if (name === 'businessCategory') {
-      const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-      setForm(prev => ({ ...prev, [name]: selectedOptions }));
-    } else {
-      setForm(prev => ({ ...prev, [name]: value }));
-    }
-    
-    // Clear error when user starts typing
-    if (error) setError("");
-  }
-
-  // Handles checkbox changes for service categories
-  function handleCategoryChange(e) {
-    const { value, checked } = e.target;
-    
-    setForm(prev => ({
+    setFormData(prev => ({
       ...prev,
-      businessCategory: checked 
-        ? [...prev.businessCategory, value] // Add category
-        : prev.businessCategory.filter(cat => cat !== value) // Remove category
+      [name]: value
     }));
     
-    // Clear error when user makes selection
-    if (error) setError("");
-  }
+    // Clear error when user starts typing
+    if (error) setError('');
+  };
 
-  // Client-side form validation for Provider
-  function validateForm() {
-    // All required fields for Provider registration (including business fields)
-    const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'password', 'businessType'];
+  // Handle form submission - UPDATED FOR BACKEND INTEGRATION
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    for (const field of requiredFields) {
-      if (!form[field].trim()) {
-        setError(`Please fill in your ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
-        return false;
-      }
+    // Clear previous messages
+    setError('');
+    setSuccess('');
+    
+    // Validate form data
+    if (!formData.username || !formData.email || !formData.password) {
+      setError('Please fill in all required fields');
+      return;
     }
 
-    // Validate business category (at least one must be selected)
-    if (!form.businessCategory || form.businessCategory.length === 0) {
-      setError("Please select at least one service category");
-      return false;
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(form.email)) {
-      setError("Please enter a valid email address");
-      return false;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return;
     }
 
-    // Validate phone number (basic validation for digits)
-    const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
-    if (!phoneRegex.test(form.phone)) {
-      setError("Please enter a valid phone number (at least 10 digits)");
-      return false;
-    }
-
-    // Validate password strength
-    if (form.password.length < 8) {
-      setError("Password must be at least 8 characters long");
-      return false;
-    }
-
-    // Check for at least one number and one letter
-    if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(form.password)) {
-      setError("Password must contain at least one letter and one number");
-      return false;
-    }
-
-    return true;
-  }
-
-  // Handles Provider form submission with error handling and API call
-  async function handleSubmit(e) {
-    e.preventDefault(); // Prevents default form reload
-    
-    // Clear previous errors
-    setError("");
-    
-    // Validate form before submitting
-    if (!validateForm()) return;
-    
-    // Set loading state
     setLoading(true);
-    
-    try {
-      // Step 1: Register basic Provider user account
-      const userResponse = await fetch('http://localhost:5000/api/register', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify({
-          username: `${form.firstName} ${form.lastName}`,
-          email: form.email,
-          password: form.password,
-          phone_number: form.phone,
-          user_type: "Provider" // Always Provider
-        })
-      });
-      
-      const userData = await userResponse.json();
-      
-      if (!userResponse.ok || !userData.success) {
-        throw new Error(userData.message || 'Provider registration failed');
-      }
 
-      // Step 2: Register Provider business information
-      const providerResponse = await fetch('http://localhost:5000/api/provider/register', {
+    try {
+      console.log('🚀 Submitting provider registration:', {
+        username: formData.username,
+        email: formData.email,
+        user_type: formData.user_type
+      });
+
+      // Make API call to register provider
+      const response = await fetch('http://localhost:5000/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userData.user.token}`
         },
         body: JSON.stringify({
-          provider_name: `${form.firstName} ${form.lastName}`,
-          provider_type: form.businessType,
-          business_category: form.businessCategory.join(', '), // Convert array to comma-separated string
-          location: 'Not specified', // Default value - can be updated later
-          contact_info: form.email, // Use email as default contact
-          offers_home_request: false,
-          offers_walk_in: true,
-          offers_drive_in: false
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          phone_number: formData.phone_number,
+          user_type: formData.user_type // This should be 'Provider'
         }),
       });
 
-      const providerData = await providerResponse.json();
+      const result = await response.json();
+      
+      console.log('📥 Registration response:', result);
 
-      if (!providerResponse.ok || !providerData.success) {
-        throw new Error(providerData.message || 'Provider business registration failed');
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Registration failed');
       }
 
-      // Store user data
-      localStorage.setItem('user', JSON.stringify(userData.user));
+      // Registration successful!
+      console.log('✅ Provider registration successful');
       
-      // Navigate to Provider dashboard
-      navigate('/provider', {
-        state: {
-          message: `Welcome to Waasha! Your provider account has been created successfully.`
-        }
-      });
+      // Save user data to localStorage (matches backend format)
+      localStorage.setItem('user', JSON.stringify(result.user));
+      
+      // Show success message briefly
+      setSuccess('Registration successful! Redirecting to service selection...');
+      
+      // Navigate to choose services page after short delay
+      setTimeout(() => {
+        navigate('/choose-services', {
+          state: {
+            message: `Welcome ${result.user.username}! Registration successful. Now choose your services.`
+          }
+        });
+      }, 1500); // 1.5 second delay to show success message
 
     } catch (err) {
-      // Handle network or server errors
-      console.error('Provider signup error:', err);
-      setError(err.message || 'Network error. Please check your connection and try again.');
+      console.error('❌ Registration error:', err);
+      
+      // Handle specific error messages
+      if (err.message.includes('fetch') || err.message.includes('NetworkError')) {
+        setError('Cannot connect to server. Please ensure the backend is running.');
+      } else if (err.message.includes('Failed to fetch')) {
+        setError('Backend server is not responding. Please start the server and try again.');
+      } else {
+        setError(err.message || 'Registration failed. Please try again.');
+      }
     } finally {
-      // Reset loading state regardless of success/failure
       setLoading(false);
     }
-  }
+  };
 
-  // Renders the Provider signup form UI
   return (
-    <>
-      {/* Top section with back link and branding */}
-      <div className="card-top">
-        <Link to="/" className="back-link" aria-label="Go back to home">←</Link>
-        <div className="top-text">
-          <div className="small-brand">Welcome to WAASHA</div>
-          <div className="small-slogan">The Future Of Service, Today</div>
-        </div>
-      </div>
-
-      {/* Main Provider signup card */}
-      <div className="card">
-        <h2 className="card-title">🚀 Sign Up as Provider</h2>
-        <p className="card-subtitle">Start your business journey with us</p>
-
-        {/* Display error message if exists */}
-        {error && (
-          <div 
-            className="error-message" 
-            role="alert"
+    <div className="signup-form-container">
+      <div className="signup-form-card">
+        
+        {/* Top Navigation: Back Arrow (Left) and Logo (Right) */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '24px'
+        }}>
+          {/* Back Arrow - Top Left */}
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="back-button"
             style={{
-              color: 'red', 
-              backgroundColor: '#ffe6e6', 
-              padding: '10px', 
-              borderRadius: '5px', 
-              marginBottom: '15px',
-              fontSize: '14px'
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: '#666',
+              padding: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'color 0.2s ease'
             }}
-            aria-live="polite" // Announces error to screen readers
+            onMouseOver={(e) => e.currentTarget.style.color = '#1976d2'}
+            onMouseOut={(e) => e.currentTarget.style.color = '#666'}
+            aria-label="Go back"
           >
-            {error}
+            ← Back
+          </button>
+
+          {/* Logo - Top Right */}
+          <img 
+            src={logo} 
+            alt="Waasha Logo" 
+            style={{
+              width: '40px',
+              height: '40px',
+              objectFit: 'contain'
+            }}
+          />
+        </div>
+
+        {/* Form Header */}
+        <div className="form-header">
+          <h2 className="form-title">Join as a Service Provider</h2>
+          <p className="form-subtitle">Create your account to start offering services</p>
+        </div>
+
+        {/* Success Message Display */}
+        {success && (
+          <div className="alert alert-success">
+            <span className="alert-icon">✅</span>
+            <span className="alert-message">{success}</span>
           </div>
         )}
 
-        {/* Provider signup form */}
-        <form onSubmit={handleSubmit} className="form" noValidate>
-          <label htmlFor="firstName">First Name</label>
-          <input 
-            id="firstName"
-            name="firstName" 
-            value={form.firstName} 
-            onChange={handleChange}
-            placeholder="Enter first name..." 
-            required 
-            disabled={loading}
-            aria-describedby={error ? "error-message" : undefined}
-          />
+        {/* Error Message Display */}
+        {error && (
+          <div className="alert alert-error">
+            <span className="alert-icon">⚠️</span>
+            <span className="alert-message">{error}</span>
+          </div>
+        )}
 
-          <label htmlFor="lastName">Last Name</label>
-          <input 
-            id="lastName"
-            name="lastName" 
-            value={form.lastName} 
-            onChange={handleChange}
-            placeholder="Enter last name..." 
-            required 
-            disabled={loading}
-          />
-
-          <label htmlFor="email">Email</label>
-          <input 
-            id="email"
-            name="email" 
-            type="email" 
-            value={form.email} 
-            onChange={handleChange}
-            placeholder="Enter email..." 
-            required 
-            disabled={loading}
-          />
-
-          <label htmlFor="phone">Phone Number</label>
-          <input 
-            id="phone"
-            name="phone" 
-            type="tel"
-            value={form.phone} 
-            onChange={handleChange}
-            placeholder="Enter phone number..." 
-            required 
-            disabled={loading}
-          />
-
-          {/* Provider business fields - always visible */}
-          <label htmlFor="businessType">Business Type</label>
-          <select 
-            id="businessType"
-            name="businessType" 
-            value={form.businessType} 
-            onChange={handleChange}
-            required 
-            disabled={loading}
-          >
-            <option value="">Select business type...</option>
-            <option value="Individual">Individual</option>
-            <option value="Salon">Salon</option>
-            <option value="Barbershop">Barbershop</option>
-            <option value="Carwash">Carwash</option>
-            <option value="Training Center">Training Center</option>
-          </select>
-
-          {/* Service Categories - Multiple Selection with Checkboxes */}
-          <label>Service Categories (Select all that apply)</label>
-          <div style={{
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            padding: '10px',
-            marginBottom: '15px',
-            backgroundColor: '#fafafa',
-            maxHeight: '200px',
-            overflowY: 'auto'
-          }}>
-            {[
-              { value: "Hairstyling", label: "Hairstyling Services" },
-              { value: "Haircut", label: "Haircut Services" },
-              { value: "Beauty", label: "Makeup Services" },
-              { value: "Nails", label: "Nail Services" },
-              { value: "Carwash", label: "Car Wash Services" },
-              { value: "Training", label: "Training & Education" },
-              { value: "Other", label: "Other Services" }
-            ].map((category) => (
-              <div key={category.value} style={{ marginBottom: '8px' }}>
-                <label style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: 'normal'
-                }}>
-                  <input
-                    type="checkbox"
-                    value={category.value}
-                    checked={form.businessCategory.includes(category.value)}
-                    onChange={handleCategoryChange}
-                    disabled={loading}
-                    style={{ 
-                      marginRight: '8px',
-                      width: '16px',
-                      height: '16px'
-                    }}
-                  />
-                  {category.label}
-                </label>
-              </div>
-            ))}
+        {/* Registration Form */}
+        <form onSubmit={handleSubmit} className="signup-form">
+          
+          {/* Username Field */}
+          <div className="form-group">
+            <label htmlFor="username" className="form-label">
+              Business/Provider Name <span className="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleInputChange}
+              required
+              disabled={loading}
+              placeholder="Enter your business or provider name"
+              className="form-input"
+            />
           </div>
 
-          {/* Display selected categories */}
-          {form.businessCategory.length > 0 && (
-            <div style={{
-              backgroundColor: '#e8f5e8',
-              color: '#2e7d32',
-              padding: '8px',
-              borderRadius: '4px',
-              marginBottom: '15px',
-              fontSize: '13px'
-            }}>
-              <strong>Selected:</strong> {form.businessCategory.join(', ')}
-            </div>
-          )}
-
-          {/* Info message for providers */}
-          <div 
-            style={{
-              backgroundColor: '#e8f4fd',
-              color: '#1976d2',
-              padding: '10px',
-              borderRadius: '5px',
-              marginBottom: '15px',
-              fontSize: '13px',
-              border: '1px solid #bbdefb'
-            }}
-          >
-            💡 <strong>Don't worry!</strong> You can add more business details like location and service options later in your provider dashboard.
+          {/* Email Field */}
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">
+              Email Address <span className="required">*</span>
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+              disabled={loading}
+              placeholder="Enter your email address"
+              className="form-input"
+            />
           </div>
 
-          <label htmlFor="password">Password</label>
-          <input 
-            id="password"
-            name="password" 
-            type="password" 
-            value={form.password} 
-            onChange={handleChange}
-            placeholder="Enter password (min 8 characters)..." 
-            required 
-            disabled={loading}
-            minLength={8}
-          />
+          {/* Phone Number Field */}
+          <div className="form-group">
+            <label htmlFor="phone_number" className="form-label">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              id="phone_number"
+              name="phone_number"
+              value={formData.phone_number}
+              onChange={handleInputChange}
+              disabled={loading}
+              placeholder="Enter your phone number"
+              className="form-input"
+            />
+          </div>
 
-          {/* Submit button with loading state */}
+          {/* Password Field */}
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">
+              Password <span className="required">*</span>
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              required
+              disabled={loading}
+              placeholder="Create a password (min 6 characters)"
+              className="form-input"
+              minLength="6"
+            />
+          </div>
+
+          {/* Confirm Password Field */}
+          <div className="form-group">
+            <label htmlFor="confirmPassword" className="form-label">
+              Confirm Password <span className="required">*</span>
+            </label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              required
+              disabled={loading}
+              placeholder="Confirm your password"
+              className="form-input"
+              minLength="6"
+            />
+          </div>
+
+          {/* Submit Button */}
           <button 
             type="submit" 
-            className="btn submit"
+            className={`btn btn-primary btn-submit ${loading ? 'btn-loading' : ''}`}
             disabled={loading}
-            aria-label={loading ? "Creating provider account..." : "Sign Up as Provider"}
           >
-            {loading ? "CREATING PROVIDER ACCOUNT..." : "🚀 SIGN UP AS PROVIDER"}
+            {loading ? (
+              <>
+                <span className="spinner"></span>
+                Creating Account...
+              </>
+            ) : (
+              'Create Provider Account'
+            )}
           </button>
+
+          {/* Login Link */}
+          <div className="form-footer">
+            <p className="form-footer-text">
+              Already have an account?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="link-button"
+                disabled={loading}
+              >
+                Sign In
+              </button>
+            </p>
+          </div>
+
         </form>
 
-        {/* Footer with navigation links */}
-        <div className="card-footer">
-          <span>Already have an account? </span>
-          <Link to="/login" aria-label="Go to login page">LOG IN</Link>
-          <br />
-          <span>Want to join as a client? </span>
-          <Link to="/signup-client" aria-label="Sign up as client">SIGN UP AS CLIENT</Link>
+        {/* Next Steps Information */}
+        <div className="info-box">
+          <strong className="info-box-title">📋 Next Steps:</strong>
+          <ol className="info-box-list">
+            <li>Complete registration</li>
+            <li>Choose services you offer</li>
+            <li>Set up your provider profile</li>
+            <li>Start receiving bookings!</li>
+          </ol>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
