@@ -129,6 +129,27 @@ function ProviderDashboard() {
             ============================================ */}
         
         {/* Personalized greeting using user's name from state */}
+        <div className='TopNav' id='TopNav'>
+  {/* Back Arrow Icon */}
+  <span 
+    className="icon" 
+    id="back-arrow"
+    onClick={() => navigate(-1)} // Go back to previous page
+    style={{ cursor: 'pointer' }}
+  >
+    ←
+  </span>
+  
+  {/* Burger Menu Icon */}
+  <span 
+    className="icon" 
+    id="burger-menu"
+    onClick={() => {/* Toggle menu function here */}}
+    style={{ cursor: 'pointer' }}
+  >
+    ☰
+  </span>
+</div>
         <h1>Welcome, {user.username}!</h1>
         
         {/* Subtitle describing the page */}

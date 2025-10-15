@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css"; // Import enhanced global reset and base styles first
 import "./App.css"; // Import app-specific styles (components, layout, etc.)
 import App from "./App";
+import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 
 // Error boundary component to catch JavaScript errors anywhere in the component tree
 class ErrorBoundary extends React.Component {

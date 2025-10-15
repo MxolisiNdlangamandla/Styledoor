@@ -47,7 +47,7 @@ function SignupFormProvider() {
     setSuccess('');
     
     // Validate form data
-    if (!formData.username || !formData.email || !formData.password) {
+    if (!formData.username || !formData.email || !formData.password || !formData.phone_number ) {
       setError('Please fill in all required fields');
       return;
     }
@@ -59,6 +59,10 @@ function SignupFormProvider() {
 
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters long');
+      return;
+    }
+    if (formData.phone_number.length < 10) {
+      setError('Phone number must be at least 10 digits long');
       return;
     }
 

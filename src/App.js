@@ -12,30 +12,29 @@ import ChooseServices from './pages/ChooseServices';
 import AddService from './pages/Provider-a-service';
 
 function App() {
+  
   // State for current user
   const [user, setUser] = useState(null);
   // State for loading authentication
   const [authLoading, setAuthLoading] = useState(true);
 
   // 🚨 TESTING MODE - Set to false when going live
-  const TESTING_MODE = false;
+  const TESTING_MODE = false; // ✅ Changed to false to test real signup flow
 
-  // Mock user data for testing
+  // Mock user data for testing (only used when TESTING_MODE = true)
   const MOCK_CLIENT_USER = {
     id: 1,
-    first_name: 'John',
-    last_name: 'Doe',
+    username: 'John Doe',
     email: 'john@example.com',
-    role: 'client',
+    user_type: 'Client',
     token: 'mock-client-token'
   };
 
   const MOCK_PROVIDER_USER = {
     id: 2,
-    first_name: 'Jane',
-    last_name: 'Smith',
+    username: 'Jane Smith',
     email: 'jane@example.com',
-    role: 'provider',
+    user_type: 'Provider',
     token: 'mock-provider-token'
   };
 
@@ -47,67 +46,61 @@ function App() {
         // You can change this to MOCK_PROVIDER_USER to test provider dashboard
         setUser(MOCK_CLIENT_USER);
         setAuthLoading(false);
-      }, 500); // Small delay to simulate loading
+      }, 500);
     } else {
+      // ✅ Check for real user data from localStorage
       checkAuthStatus();
     }
   }, []);
 
-  // Check if user is already logged in (from localStorage or sessionStorage)
-  async function checkAuthStatus() {
+  // ✅ Check if user is already logged in (from localStorage)
+  function checkAuthStatus() {
     try {
-      // Check localStorage for saved user data
-      const savedUser = localStorage.getItem('waasha_user');
+      // Check localStorage for saved user data (matches backend response)
+      const savedUser = localStorage.getItem('user');
+      
       if (savedUser) {
         const userData = JSON.parse(savedUser);
-        
-        // Verify the token is still valid
-        const response = await fetch('http://localhost:5000/api/verify-token', {
-          headers: {
-            'Authorization': `Bearer ${userData.token}`
-          }
-        });
-        
-        if (response.ok) {
-          setUser(userData);
-        } else {
-          // Token is invalid, remove from storage
-          localStorage.removeItem('waasha_user');
-        }
+        console.log('✅ Found user in localStorage:', userData);
+        setUser(userData);
+      } else {
+        console.log('ℹ️ No user found in localStorage');
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
-      localStorage.removeItem('waasha_user');
+      console.error('❌ Auth check failed:', error);
+      localStorage.removeItem('user');
     } finally {
       setAuthLoading(false);
     }
   }
 
-  // Handle user login
+  // ✅ Handle user login/registration
   function handleLogin(userData) {
+    console.log('✅ Setting user:', userData);
     setUser(userData);
-    // Save to localStorage for persistence (only in production)
-    if (!TESTING_MODE) {
-      localStorage.setItem('waasha_user', JSON.stringify(userData));
-    }
+    // Save to localStorage
+    localStorage.setItem('user', JSON.stringify(userData));
   }
 
   // Handle user logout
   function handleLogout() {
-    if (TESTING_MODE) {
-      // In testing mode, allow switching between user types
-      const switchToProvider = user?.role === 'client';
-      setUser(switchToProvider ? MOCK_PROVIDER_USER : MOCK_CLIENT_USER);
-    } else {
-      setUser(null);
-      localStorage.removeItem('waasha_user');
-    }
+    console.log('🚪 Logging out user');
+    setUser(null);
+    localStorage.removeItem('user');
   }
 
   // Show loading screen while checking authentication
   if (authLoading) {
     return (
-      <div className="app-loading">
+      <div className="app-loading" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        fontSize: '18px',
+        fontWeight: '600'
+      }}>
         Loading Waasha...
         {TESTING_MODE && (
           <div style={{ fontSize: '12px', marginTop: '8px', opacity: 0.7 }}>
@@ -118,12 +111,12 @@ function App() {
     );
   }
 
-  // Testing mode routes - direct access to dashboards
-  if (TESTING_MODE) {
-    return (
-      <Router>
-        <div className="app-root">
-          {/* Testing mode banner */}
+  // ✅ PRODUCTION MODE - Normal flow with proper authentication
+  return (
+    <Router>
+      <div className="app-root">
+        {/* Show testing banner if in testing mode */}
+        {TESTING_MODE && (
           <div style={{
             position: 'fixed',
             top: 0,
@@ -139,153 +132,98 @@ function App() {
           }}>
             🧪 TESTING MODE - Set TESTING_MODE = false for production
           </div>
-          
-          <div style={{ paddingTop: '30px' }}>
-            <Routes>
-              {/* Landing page */}
-              <Route 
-                path="/" 
-                element={<LandingPage isAuthenticated={!!user} user={user} />} 
-              />
-              <Route 
-               path="/add-service" 
-               element={<AddService />} 
-                />
+        )}
+        
+        <div style={{ paddingTop: TESTING_MODE ? '30px' : '0' }}>
+          <Routes>
+            
+            {/* ============================================
+                PUBLIC ROUTES (No authentication required)
+                ============================================ */}
+            
+            {/* Landing Page */}
+            <Route 
+              path="/" 
+              element={<LandingPage isAuthenticated={!!user} user={user} />} 
+            />
 
-              {/* Login page */}
-              <Route 
-                path="/login" 
-                element={<LoginPage setUser={handleLogin} />} 
-              />
+            {/* Login Page */}
+            <Route 
+              path="/login" 
+              element={<LoginPage setUser={handleLogin} />} 
+            />
 
-              {/* Signup pages */}
-              <Route 
-                path="/signup-client" 
-                element={<SignupClient setUser={handleLogin} />} 
-              />
+            {/* Client Signup */}
+            <Route 
+              path="/signup-client" 
+              element={<SignupClient setUser={handleLogin} />} 
+            />
 
-              <Route 
-                path="/signup-provider" 
-                element={<SignupProvider setUser={handleLogin} />} 
-              />
-                <Route 
-                path="/choose-services" 
-                element={<ChooseServices setUser={handleLogin} />} 
-              />
+            {/* Provider Signup */}
+            <Route 
+              path="/signup-provider" 
+              element={<SignupProvider setUser={handleLogin} />} 
+            />
 
-              {/* Direct access to dashboards for testing */}
-              <Route 
-                path="/client" 
-                element={
-                  <ClientDashboard 
-                    user={user || MOCK_CLIENT_USER} 
-                    onLogout={handleLogout} 
-                  />
-                } 
-              />
+            {/* ============================================
+                PROVIDER ONBOARDING FLOW
+                (Requires user in localStorage but not full auth)
+                ============================================ */}
+            
+            {/* Choose Services - After provider signup */}
+            <Route 
+              path="/choose-services" 
+              element={<ChooseServices user={user} />} 
+            />
 
-              <Route 
-                path="/provider" 
-                element={
-                  <ProviderDashboard 
-                    user={user || MOCK_PROVIDER_USER} 
-                    onLogout={handleLogout} 
-                  />
-                } 
-              />
+            {/* Add Service - Provider adds their first service */}
+            <Route 
+              path="/add-service" 
+              element={<AddService user={user} />} 
+            />
 
-              {/* Redirect unknown routes to home */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-           </div>
-          </div>
-          </Router>
-    );
-  }
+            {/* ============================================
+                PROTECTED DASHBOARDS
+                (Full authentication required)
+                ============================================ */}
+            
+            {/* Client Dashboard */}
+            <Route 
+              path="/client" 
+              element={
+                user && (user.user_type === 'Client' || user.role === 'client') ? (
+                  <ClientDashboard user={user} onLogout={handleLogout} />
+                ) : user && (user.user_type === 'Provider' || user.role === 'provider') ? (
+                  <Navigate to="/provider" replace />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
 
-  // Production mode routes - with authentication
-  return (
-    <Router>
-      <div className="app-root">
-        <Routes>
-          {/* Landing page - redirect to dashboard if logged in */}
-          <Route 
-            path="/" 
-            element={
-              user ? (
-                <Navigate to={user.role === 'provider' ? '/provider' : '/client'} replace />
-              ) : (
-                <LandingPage isAuthenticated={!!user} user={user} />
-              )
-            } 
-          />
+            {/* Provider Dashboard */}
+            <Route 
+              path="/provider" 
+              element={
+                user && (user.user_type === 'Provider' || user.role === 'provider') ? (
+                  <ProviderDashboard user={user} onLogout={handleLogout} />
+                ) : user && (user.user_type === 'Client' || user.role === 'client') ? (
+                  <Navigate to="/client" replace />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
 
-          {/* Login page - redirect to dashboard if already logged in */}
-          <Route 
-            path="/login" 
-            element={
-              user ? (
-                <Navigate to={user.role === 'provider' ? '/provider' : '/client'} replace />
-              ) : (
-                <LoginPage setUser={handleLogin} />
-              )
-            } 
-          />
-
-          {/* Signup pages - redirect to dashboard if already logged in */}
-          <Route 
-            path="/signup-client" 
-            element={
-              user ? (
-                <Navigate to={user.role === 'provider' ? '/provider' : '/client'} replace />
-              ) : (
-                <SignupClient setUser={handleLogin} />
-              )
-            } 
-          />
-
-          <Route 
-            path="/signup-provider" 
-            element={
-              user ? (
-                <Navigate to={user.role === 'provider' ? '/provider' : '/client'} replace />
-              ) : (
-                <SignupProvider setUser={handleLogin} />
-              )
-            } 
-          />
-
-          {/* Protected Client Dashboard */}
-          <Route 
-            path="/client" 
-            element={
-              user && user.role === 'client' ? (
-                <ClientDashboard user={user} onLogout={handleLogout} />
-              ) : user && user.role === 'provider' ? (
-                <Navigate to="/provider" replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } 
-          />
-
-          {/* Protected Provider Dashboard */}
-          <Route 
-            path="/provider" 
-            element={
-              user && user.role === 'provider' ? (
-                <ProviderDashboard user={user} onLogout={handleLogout} />
-              ) : user && user.role === 'client' ? (
-                <Navigate to="/client" replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } 
-          />
-
-          {/* Catch all other routes - redirect to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {/* ============================================
+                CATCH-ALL ROUTE
+                ============================================ */}
+            
+            {/* Redirect unknown routes to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+            
+          </Routes>
+        </div>
       </div>
     </Router>
   );
